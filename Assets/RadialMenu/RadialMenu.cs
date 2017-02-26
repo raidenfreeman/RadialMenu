@@ -21,7 +21,7 @@ public class RadialMenu : MonoBehaviour
 
     private int currentlyShownPage;
 
-    public int pageToShow;
+    public int StartingPage = 1;
 
     // Use this for initialization
     void Awake()
@@ -45,7 +45,7 @@ public class RadialMenu : MonoBehaviour
                 }
             }
         }
-        DisplayMenuPage(pageToShow);
+        DisplayMenuPage(StartingPage);
     }
 
     private void HidePage(int page)
@@ -79,12 +79,15 @@ public class RadialMenu : MonoBehaviour
             int i = 0;
             foreach (var item in itemsToShow)
             {
+                var childTransform = item.transform.GetChild(0).GetComponent<RectTransform>();
                 item.transform.localPosition = this.transform.localPosition;
                 item.transform.localRotation = this.transform.localRotation;
+                childTransform.anchoredPosition = Vector2.zero;
+                childTransform.localEulerAngles = Vector3.zero;
                 item.transform.Rotate(new Vector3(0, 0, -anglePerItem * i));
-                item.transform.GetChild(0).Translate(new Vector3(0, Radius, 0));
-                item.transform.GetChild(0).Rotate(-this.transform.localRotation.eulerAngles + new Vector3(0, 0, anglePerItem * i));
-                item.enabled = true;
+                childTransform.anchoredPosition = new Vector2(0, Radius);// .Translate(new Vector3(0, Radius, 0));
+                childTransform.Rotate(-this.transform.localRotation.eulerAngles + new Vector3(0, 0, anglePerItem * i));
+                item.gameObject.SetActive(true);
                 i++;
             }
         }
@@ -99,6 +102,17 @@ public class RadialMenu : MonoBehaviour
         }
         DisplayMenuPage(currentlyShownPage);
     }
+
+    public void CycleToPreviousPage()
+    {
+        currentlyShownPage--;
+        if (currentlyShownPage < 1)
+        {
+            currentlyShownPage = numberOfPages;
+        }
+        DisplayMenuPage(currentlyShownPage);
+    }
+
     private List<RadialMenuItemBase> GetPageItems(int page)
     {
         return MenuItems.Skip(Mathf.Max((page - 1), 0) * (NumberOfDisplayedItemsPerPage - numberOfNavigationItems)).Take(NumberOfDisplayedItemsPerPage - numberOfNavigationItems).ToList();
